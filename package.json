@@ -1,0 +1,13 @@
+{
+  "name": "monitor-proposicoes-sc",
+  "version": "1.0.0",
+  "description": "Monitor de proposições da ALESC via scraping HTML",
+  "main": "monitor.js",
+  "scripts": {
+    "start": "node monitor.js"
+  },
+  "dependencies": {
+    "nodemailer": "^6.9.9",
+    "cheerio": "^1.0.0"
+  }
+}
