@@ -187,7 +187,7 @@ async function enviarEmail(novas) {
   const html = `
     <div style="font-family:Arial,sans-serif;max-width:960px;margin:0 auto">
       <h2 style="color:#2c3e6b;border-bottom:2px solid #2c3e6b;padding-bottom:8px">
-        🏛️ ALESC — ${novas.length} nova(s) proposição(ões)
+        🏛️ Assembleia Legislativa de Santa Catarina — ${novas.length} nova(s) proposição(ões)
       </h2>
       <p style="color:#666">Monitoramento automático — ${new Date().toLocaleString('pt-BR')}</p>
       <table style="width:100%;border-collapse:collapse;font-size:14px">
@@ -209,9 +209,9 @@ async function enviarEmail(novas) {
   `;
 
   await transporter.sendMail({
-    from: `"Monitor ALESC" <${EMAIL_REMETENTE}>`,
+    from: `"Monitor Santa Catarina" <${EMAIL_REMETENTE}>`,
     to: EMAIL_DESTINO,
-    subject: `🏛️ ALESC: ${novas.length} nova(s) proposição(ões) — ${new Date().toLocaleDateString('pt-BR')}`,
+    subject: `🏛️ Santa Catarina: ${novas.length} nova(s) proposição(ões) — ${new Date().toLocaleDateString('pt-BR')}`,
     html,
   });
 
