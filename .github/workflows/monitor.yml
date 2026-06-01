@@ -33,10 +33,25 @@ jobs:
           EMAIL_REMETENTE: ${{ secrets.EMAIL_REMETENTE }}
           EMAIL_SENHA: ${{ secrets.EMAIL_SENHA }}
           EMAIL_DESTINO: ${{ secrets.EMAIL_DESTINO }}
-        run: node monitor.js
+        run: |
+          set +e
+          node monitor.js 2>&1 | tee monitor.log
+          status=${PIPESTATUS[0]}
+          if [ "$status" -ne 0 ]; then
+            {
+              echo "## Monitor SC falhou na execução"
+              echo
+              echo '```text'
+              tail -80 monitor.log
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "::error title=Monitor SC execução::$(tail -20 monitor.log | tr '\n' ' ' | sed 's/%/%25/g')"
+          fi
+          exit "$status"
 
       - name: Salvar estado atualizado no repositório
         run: |
+          set +e
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           if [ ! -f estado.json ]; then
@@ -44,4 +59,24 @@ jobs:
           fi
           git add estado.json
           git diff --staged --quiet || git commit -m "chore: atualiza estado [skip ci]"
-          git push
+          status_commit=$?
+          if [ "$status_commit" -ne 0 ]; then
+            echo "FALHA_ESTADO=git commit/push estado.json falhou antes do push" | tee estado-error.log
+            echo "::error title=Monitor SC estado::Falha ao commitar estado.json"
+            exit "$status_commit"
+          fi
+          git push 2>&1 | tee estado-push.log
+          status_push=${PIPESTATUS[0]}
+          if [ "$status_push" -ne 0 ]; then
+            echo "FALHA_ESTADO=git push estado.json falhou" | tee estado-error.log
+            echo "::error title=Monitor SC estado::Falha ao enviar estado.json para o GitHub"
+          fi
+          exit "$status_push"
+
+      - name: Alertar falha interna
+        if: failure()
+        env:
+          EMAIL_REMETENTE: ${{ secrets.EMAIL_REMETENTE }}
+          EMAIL_SENHA: ${{ secrets.EMAIL_SENHA }}
+          EMAIL_ALERTA_FALHA: flavia@monitorlegislativo.com.br
+        run: node scripts/send-failure-alert.js
