@@ -587,7 +587,7 @@ async function enviarEmail(novas) {
       return (parseInt(b.numero) || 0) - (parseInt(a.numero) || 0);
     });
 
-    await sincronizarRadar03(novas);
+    await sincronizarRadar03(todasNovas);
     await enviarEmail(todasNovas);
 
     todasNovas.forEach(p => idsVistos.add(p.id));
