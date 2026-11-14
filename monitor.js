@@ -1,3 +1,4 @@
+const lacunas03 = require('./lacunas03');
 const mlPropsPriority = require('./priority_terms');
 
 const FICHA_URL = process.env.FICHA_URL || 'https://doe.monitorlegislativo.com.br/ficha';
@@ -490,6 +491,7 @@ async function sincronizarRadar03(novas) {
         const base = Number.parseInt(String(item.base || baseAtual || 0), 10) || 0;
         item.tipo = det.tipo;
         item.mon = det.numeroInt;
+        item.ano = String(det.ano || item.ano || '');
         item.delta = det.numeroInt === base ? 0 : 1;
         item.sentido = det.numeroInt === base ? 'bate com o controle' : 'captado individualmente na fonte';
         item.fluxo = item.delta ? 'nao_consultado' : (item.fluxo || 'revisado');
@@ -631,7 +633,7 @@ async function enviarEmail(novas) {
     </div>
   `;
 
-  await transporter.sendMail({
+  await lacunas03.sendMail.bind(null, transporter, {casa: CASA_RADAR03, stateUrl: CONTROLE03_STATE_URL, headers: radar03AuthHeaders})({
     from: `"Monitor Santa Catarina" <${EMAIL_REMETENTE}>`,
     to: EMAIL_DESTINO,
     subject: assuntoEmailClienteCitado(novas, `🏛️ Santa Catarina: ${novas.length} nova(s) proposição(ões) — ${new Date().toLocaleDateString('pt-BR')}`),
